@@ -19,16 +19,14 @@ export class AuthController {
   private logger = new Logger(AuthController.name);
   constructor(private prisma: PrismaService) {}
 
-  @Post()
+  @Post('createProfile')
   @UseGuards(SupabaseGuard)
   async createProfile(
     @Req() req: any,
     @Body() body: createProfileDTO,
   ): Promise<{ message: string }> {
-    const user = req.user;
-
     let userCheck = await this.prisma.users.findUnique({
-      where: { email: user.email },
+      where: { email: body.email },
     });
 
     this.logger.log(`Creating profile for ${userCheck?.email} `);
@@ -36,15 +34,15 @@ export class AuthController {
     if (!userCheck) {
       await this.prisma.users.create({
         data: {
-          email: user.email,
-          name: user.name,
-          username: user.username,
-          bio: user.bio,
+          email: body.email,
+          name: body.name,
+          username: body.username,
+          bio: body.bio,
         },
       });
-      return { message: `${user.userName} profile created successfully!` };
+      return { message: `${body.username} profile created successfully!` };
     }
 
-    return { message: `${user.userName} already exists!` };
+    return { message: `${body.username} already exists!` };
   }
 }
