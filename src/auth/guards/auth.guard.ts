@@ -14,8 +14,8 @@ export class SupabaseGuard implements CanActivate {
 
   constructor(private configService: ConfigService) {
     this.supabase = createClient(
-      this.configService.get<string>('SUPABASE_URL')!,
-      this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY')!,
+      this.configService.getOrThrow<string>('SUPABASE_URL'),
+      this.configService.getOrThrow<string>('SUPABASE_SERVICE_ROLE_KEY'),
     );
   }
 
@@ -25,7 +25,7 @@ export class SupabaseGuard implements CanActivate {
     const header = req.headers['authorization'];
 
     if (!header) throw new UnauthorizedException('No token provided');
-    console.log(header);
+
     const token = header.split(' ')[1];
     const { data, error } = await this.supabase.auth.getUser(token);
     if (error || !data) {
