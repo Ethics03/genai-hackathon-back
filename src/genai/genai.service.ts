@@ -11,7 +11,7 @@ export class GenaiService {
     this.genAI = new GoogleGenAI({ apiKey: apiKey });
   }
 
-  async generateContent() {
+  async ChatContent(content: string) {
     const res = this.genAI.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: 'Explain how cool Nestjs IS',
