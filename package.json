@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@composio/core": "^0.1.45",
     "@google/genai": "^1.14.0",
     "@nestjs/class-validator": "^0.13.4",
     "@nestjs/common": "^11.0.1",
