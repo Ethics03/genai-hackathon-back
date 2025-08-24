@@ -2,6 +2,7 @@ import {
   IsDate,
   IsDateString,
   IsDecimal,
+  IsNumber,
   IsOptional,
   IsString,
   Min,
@@ -24,6 +25,10 @@ export class sleepEntryDTO {
   @IsOptional()
   @IsString()
   reason: string;
+
+  @IsOptional()
+  @IsNumber()
+  sleepQuality: number;
 
   @IsOptional()
   @IsDecimal()

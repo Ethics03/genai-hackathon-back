@@ -30,25 +30,25 @@ model Users {
 }
 
 model House {
-  houseId     String   @id @default(cuid())
+  houseId     String @id @default(cuid())
   userId      String
-  name        String   @unique
+  name        String @unique
   description String
-  traits      String[]
   color       String
   motto       String
-  user        Users    @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  user        Users  @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model SleepEntry {
-  sleepId   String   @id @default(cuid())
-  userId    String
-  bedTime   DateTime
-  wakeTime  DateTime
-  sleepDate DateTime @db.Date
-  reason    String
-  duration  Float?   @map("duration")
-  user      Users    @relation(fields: [userId], references: [userId])
+  sleepId      String   @id @default(cuid())
+  userId       String
+  bedTime      DateTime
+  wakeTime     DateTime
+  sleepDate    DateTime @db.Date
+  reason       String
+  sleepQuality Float?
+  duration     Float?   @map("duration")
+  user         Users    @relation(fields: [userId], references: [userId])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
