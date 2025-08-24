@@ -53,4 +53,9 @@ export class ChatService {
       throw new Error('Failed to process chat message');
     }
   }
+  clearSession(userId: string): boolean {
+    return this.sessions.delete(userId);
+  }
+  
+  
 }

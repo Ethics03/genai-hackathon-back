@@ -6,8 +6,15 @@ import { ConfigModule } from '@nestjs/config';
 import { GenaiService } from './genai/genai.service';
 import { GenaiModule } from './genai/genai.module';
 import { ChatModule } from './chat/chat.module';
+import { TrackerModule } from './tracker/tracker.module';
 @Module({
-  imports: [AuthModule, ConfigModule.forRoot({ isGlobal: true }), GenaiModule, ChatModule],
+  imports: [
+    AuthModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+    GenaiModule,
+    ChatModule,
+    TrackerModule,
+  ],
   controllers: [AppController],
   providers: [AppService, GenaiService],
 })
