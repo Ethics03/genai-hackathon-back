@@ -7,18 +7,23 @@ import { GoogleGenAI, Modality } from '@google/genai';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'node:fs';
 import { NotFoundError } from 'rxjs';
-import { BinauralBeatsRequest, BinauralBeatsResponse } from './dto/genai.dto';
+import { BinauralBeatsRequest, BinauralBeatsResponse, SleepAnalysisReq } from './dto/genai.dto';
 import AudioBuffer from 'audio-buffer';
 import * as audioBufferToWav from 'audiobuffer-to-wav';
 import { MOOD_CONFIGS, MoodConfig } from './dto/genai.dto';
+import { PrismaService } from 'src/auth/prisma.service';
 
 @Injectable()
 export class GenaiService {
   private genAI: GoogleGenAI;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly prisma: PrismaService
+  ) {
     const apiKey = this.configService.getOrThrow('GEMINI_API_KEY');
     this.genAI = new GoogleGenAI({ apiKey: apiKey });
+
   }
 
   async GenerateImage(prompt: string): Promise<any> {
@@ -88,8 +93,9 @@ export class GenaiService {
         data[i] = Math.sin(2 * Math.PI * freq * (i / sampleRate)) * gain;
       }
     }
-
+    //return the audio in .wav format
     const wav = audioBufferToWav(buffer);
     return Buffer.from(wav);
   }
+ 
 }

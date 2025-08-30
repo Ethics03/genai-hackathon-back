@@ -1,3 +1,5 @@
+import { IsString } from '@nestjs/class-validator';
+
 export interface BinauralBeatsResponse {
   message: string;
   audioStream: string;
@@ -85,3 +87,22 @@ export const MOOD_CONFIGS: Record<string, MoodConfig> = {
     bpm: 90,
   },
 };
+
+export class SleepAnalysisResponse {
+  sleepScore: number;
+  analysis: string;
+  recommendations: string[];
+  insight: {
+    durationAnalysis: string;
+    timingAnalysis: string;
+    totalAnalysis: string;
+  };
+}
+
+export class SleepAnalysisReq {
+  @IsString()
+  userId: string;
+
+  @IsString()
+  date?: string;
+}
