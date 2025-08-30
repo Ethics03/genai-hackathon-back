@@ -41,7 +41,7 @@ model House {
 
 model SleepEntry {
   sleepId      String   @id @default(cuid())
-  userId       String
+  userId       String   @unique
   bedTime      DateTime
   wakeTime     DateTime
   sleepDate    DateTime @db.Date

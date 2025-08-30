@@ -3,6 +3,7 @@ export class MessageDTO {
 }
 
 export class ChatDTO {
-  userId: string;
   message: string;
 }
+
+
