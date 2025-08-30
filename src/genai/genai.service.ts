@@ -6,11 +6,9 @@ import {
 import { GoogleGenAI, Modality } from '@google/genai';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'node:fs';
-import { NotFoundError } from 'rxjs';
-import { BinauralBeatsRequest, BinauralBeatsResponse, SleepAnalysisReq } from './dto/genai.dto';
 import AudioBuffer from 'audio-buffer';
 import * as audioBufferToWav from 'audiobuffer-to-wav';
-import { MOOD_CONFIGS, MoodConfig } from './dto/genai.dto';
+import { MOOD_CONFIGS } from './dto/genai.dto';
 import { PrismaService } from 'src/auth/prisma.service';
 
 @Injectable()
@@ -19,11 +17,10 @@ export class GenaiService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
   ) {
-    const apiKey = this.configService.getOrThrow('GEMINI_API_KEY');
+    const apiKey: string = this.configService.getOrThrow('GEMINI_API_KEY');
     this.genAI = new GoogleGenAI({ apiKey: apiKey });
-
   }
 
   async GenerateImage(prompt: string): Promise<any> {
@@ -67,7 +64,7 @@ export class GenaiService {
     }
   }
 
-  async generateBinaural(mood: string, duration: number) {
+  generateBinaural(mood: string, duration: number) {
     const config = MOOD_CONFIGS[mood];
     if (!config) {
       throw new BadRequestException(`Invalid mood: ${mood}`);
@@ -97,5 +94,4 @@ export class GenaiService {
     const wav = audioBufferToWav(buffer);
     return Buffer.from(wav);
   }
- 
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { sleepEntryDTO } from './dto/tracker.dto';
 import { TrackerService } from './tracker.service';
 

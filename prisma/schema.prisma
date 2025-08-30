@@ -22,6 +22,7 @@ model Users {
   bio       String?      @db.VarChar(300)
   house     House[]
   sleep     SleepEntry[]
+  activity  UserActivity[]
   createdAt DateTime     @default(now())
   updatedAt DateTime     @default(now()) @updatedAt
 
@@ -56,6 +57,21 @@ model SleepEntry {
   @@unique([userId, sleepDate])
   @@index([sleepDate])
 }
+
+model UserActivity {
+  id    String  @id @default(cuid())
+  userId String
+  date  DateTime  @db.Date
+
+  user Users @relation(fields: [userId],references: [userId], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+
+  @@unique([userId, date])
+  @@index([date])
+}
+
 
 enum Houses {
   luminara
