@@ -7,6 +7,7 @@ import { GenaiService } from './genai/genai.service';
 import { GenaiModule } from './genai/genai.module';
 import { ChatModule } from './chat/chat.module';
 import { TrackerModule } from './tracker/tracker.module';
+import { PrismaService } from './auth/prisma.service';
 @Module({
   imports: [
     AuthModule,
@@ -16,6 +17,6 @@ import { TrackerModule } from './tracker/tracker.module';
     TrackerModule,
   ],
   controllers: [AppController],
-  providers: [AppService, GenaiService],
+  providers: [AppService, GenaiService, PrismaService],
 })
 export class AppModule {}

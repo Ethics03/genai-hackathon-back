@@ -25,7 +25,7 @@ export class AuthController {
     @Req() req: any,
     @Body() body: createProfileDTO,
   ): Promise<{ message: string }> {
-    let userCheck = await this.prisma.users.findUnique({
+    const userCheck = await this.prisma.users.findUnique({
       where: { email: body.email },
     });
 

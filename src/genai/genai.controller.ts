@@ -21,7 +21,7 @@ export class GenaiController {
   }
 
   @Get('binaural')
-  async getBinauralBeats(
+  getBinauralBeats(
     @Query('mood') mood: string,
     @Query('duration') duration: string,
     @Res() res: Response,
@@ -29,7 +29,7 @@ export class GenaiController {
     const dur = parseInt(duration, 10) || 10; // default 10 sec
 
     // call service (should return a Buffer of WAV data)
-    const wavBuffer = await this.genAiService.generateBinaural(mood, dur);
+    const wavBuffer = this.genAiService.generateBinaural(mood, dur);
 
     // set headers for download/stream
     res.setHeader('Content-Type', 'audio/wav');
