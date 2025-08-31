@@ -6,10 +6,9 @@ import {
 import { GoogleGenAI, Modality } from '@google/genai';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'node:fs';
-import AudioBuffer from 'audio-buffer';
-import * as audioBufferToWav from 'audiobuffer-to-wav';
 import { MOOD_CONFIGS } from './dto/genai.dto';
 import { PrismaService } from 'src/auth/prisma.service';
+import * as audioBufferToWav from 'audiobuffer-to-wav';
 
 @Injectable()
 export class GenaiService {
@@ -52,7 +51,6 @@ export class GenaiService {
       if (!imageData) {
         throw new NotFoundException('No image generated');
       }
-
       return {
         message: `${genText}`,
         image: imageData,
@@ -69,18 +67,15 @@ export class GenaiService {
     if (!config) {
       throw new BadRequestException(`Invalid mood: ${mood}`);
     }
-
     const { carrier, beat } = config;
     // accepted value
     const sampleRate = 44100;
     const length = sampleRate * duration;
-
     const buffer = new AudioBuffer({
       length,
       numberOfChannels: 2,
       sampleRate,
     });
-
     for (let channel = 0; channel < 2; channel++) {
       const data = buffer.getChannelData(channel);
       const freq = channel === 0 ? carrier : carrier + beat; // Left = base, Right = base+beat
