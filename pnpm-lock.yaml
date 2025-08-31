@@ -50,15 +50,12 @@ importers:
       audiobuffer-to-wav:
         specifier: ^1.0.0
         version: 1.0.0
-<<<<<<< HEAD
-      dotenv:
-        specifier: ^17.2.1
-        version: 17.2.1
-=======
       axios:
         specifier: ^1.11.0
         version: 1.11.0
->>>>>>> 756a0064540bd6f2d30963ec383fbcbe094266b8
+      dotenv:
+        specifier: ^17.2.1
+        version: 17.2.1
       firebase-admin:
         specifier: ^13.4.0
         version: 13.4.0

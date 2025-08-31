@@ -34,11 +34,9 @@
     "@supabase/supabase-js": "^2.55.0",
     "audio-buffer": "^5.0.0",
     "audiobuffer-to-wav": "^1.0.0",
-<<<<<<< HEAD
     "dotenv": "^17.2.1",
-=======
     "axios": "^1.11.0",
->>>>>>> 756a0064540bd6f2d30963ec383fbcbe094266b8
+
     "firebase-admin": "^13.4.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
