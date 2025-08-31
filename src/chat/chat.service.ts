@@ -9,7 +9,7 @@ export class ChatService {
   private sessions: Map<string, any> = new Map();
   private readonly logger = new Logger(ChatService.name);
   constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.getOrThrow('GEMINI_API_KEY');
+    const apiKey: string = this.configService.getOrThrow('GEMINI_API_KEY');
     this.genAI = new GoogleGenAI({ apiKey: apiKey });
   }
 

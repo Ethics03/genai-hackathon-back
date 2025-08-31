@@ -5,5 +5,3 @@ export class MessageDTO {
 export class ChatDTO {
   message: string;
 }
-
-
