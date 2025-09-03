@@ -1,20 +1,27 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { GoogleGenAI, Modality } from '@google/genai';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'node:fs';
+
 import AudioBuffer from 'audio-buffer';
 import * as audioBufferToWav from 'audiobuffer-to-wav';
-import { MOOD_CONFIGS } from './dto/genai.dto';
+import {
+  MOOD_CONFIGS,
+  SleepAnalysisReq,
+  SleepAnalysisResponse,
+} from './dto/genai.dto';
 import { PrismaService } from 'src/auth/prisma.service';
+import { sleepEntryDTO } from 'src/tracker/dto/tracker.dto';
 
 @Injectable()
 export class GenaiService {
   private genAI: GoogleGenAI;
-
+  private logger = new Logger(GenaiService.name);
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
@@ -52,7 +59,6 @@ export class GenaiService {
       if (!imageData) {
         throw new NotFoundException('No image generated');
       }
-
       return {
         message: `${genText}`,
         image: imageData,
@@ -69,18 +75,15 @@ export class GenaiService {
     if (!config) {
       throw new BadRequestException(`Invalid mood: ${mood}`);
     }
-
     const { carrier, beat } = config;
     // accepted value
     const sampleRate = 44100;
     const length = sampleRate * duration;
-
     const buffer = new AudioBuffer({
       length,
       numberOfChannels: 2,
       sampleRate,
     });
-
     for (let channel = 0; channel < 2; channel++) {
       const data = buffer.getChannelData(channel);
       const freq = channel === 0 ? carrier : carrier + beat; // Left = base, Right = base+beat
@@ -93,5 +96,103 @@ export class GenaiService {
     //return the audio in .wav format
     const wav = audioBufferToWav(buffer);
     return Buffer.from(wav);
+  }
+
+  async analyzeSleep(
+    sleepReq: SleepAnalysisReq,
+    sleepData: sleepEntryDTO,
+  ): Promise<SleepAnalysisResponse> {
+    try {
+      this.logger.log(`Analyzing sleep data for user: ${sleepReq.userId}`);
+      const prompt = this.provideSleepPrompt(sleepData, sleepReq.date);
+      const response = await this.genAI.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          temperature: 0.3,
+          responseMimeType: 'application/json',
+        },
+      });
+
+      if (!response.text) {
+        throw new Error('Empty response from Gemini API');
+      }
+
+      try {
+        const parseJson = JSON.parse(response.text) as SleepAnalysisResponse;
+        return {
+          sleepScore: parseJson.sleepScore || 0,
+          analysis: parseJson.analysis || 'Analysis not available',
+          recommendations: Array.isArray(parseJson.recommendations)
+            ? parseJson.recommendations
+            : ['No recommendations available'],
+          insight: {
+            durationAnalysis:
+              parseJson.insight?.durationAnalysis ||
+              'Duration analysis not available',
+            timingAnalysis:
+              parseJson.insight?.timingAnalysis ||
+              'Timing analysis not available',
+            totalAnalysis:
+              parseJson.insight?.totalAnalysis ||
+              'Total analysis not available',
+          },
+        };
+      } catch (parseError) {
+        this.logger.error('Error parsing Gemini JSON response: ', parseError);
+
+        return {
+          sleepScore: 0,
+          analysis: 'Unable to analyze sleep data at this time',
+          recommendations: ['Please try again later'],
+          insight: {
+            durationAnalysis: 'Analysis unavailable',
+            timingAnalysis: 'Analysis unavailable',
+            totalAnalysis: 'Analysis unavailable',
+          },
+        };
+      }
+    } catch (error) {
+      this.logger.error('Error analyzing sleep data with Gemini API:', error);
+      throw new Error('Failed to analyze sleep data');
+    }
+  }
+
+  private provideSleepPrompt(sleepData: sleepEntryDTO, date?: string) {
+    return `You are a sleep analysis expert. Analyze the following sleep data and provide insights.
+
+    Sleep Data:
+    - User ID: ${sleepData.userId}
+    - Bed Time: ${sleepData.bedTime}
+    - Wake Time: ${sleepData.wakeTime}
+    - Sleep Date: ${sleepData.sleepDate || date || 'Not specified'}
+    - Reason/Notes: ${sleepData.reason || 'None provided'}
+
+    Date: ${date || sleepData.sleepDate || 'Not specified'}
+
+    Provide your analysis in this exact JSON structure:
+    {
+      "sleepScore": <number between 0-100>,
+      "analysis": "<detailed analysis of the sleep quality based on bedtime, wake time, duration, and quality rating>",
+      "recommendations": [
+        "<recommendation 1>",
+        "<recommendation 2>",
+        "<recommendation 3>"
+      ],
+      "insight": {
+        "durationAnalysis": "<analysis of sleep duration>",
+        "timingAnalysis": "<analysis of bedtime and wake time patterns>",
+        "totalAnalysis": "<overall sleep pattern analysis considering all factors>"
+      }
+    }
+
+    Consider factors like:
+    - Sleep duration (7-9 hours is typically optimal for adults)
+    - Sleep timing (bedtime and wake time consistency)
+    - Self-reported sleep quality rating
+    - Any reasons or notes provided
+    - Sleep hygiene recommendations
+
+    Provide actionable insights and personalized recommendations based on the actual data provided.`;
   }
 }

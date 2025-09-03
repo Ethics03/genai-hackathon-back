@@ -5,24 +5,30 @@ import {
   Post,
   Query,
   Res,
-  UseGuards,
   Param,
   BadRequestException,
+  Logger,
+  HttpException,
+  HttpStatus,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { GenaiService } from './genai.service';
-import { SupabaseGuard } from 'src/auth/guards/auth.guard';
 import { Response } from 'express';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
 import { ConfigService } from '@nestjs/config';
+import { SleepAnalysisReq, SleepAnalysisResponse } from './dto/genai.dto';
+import { sleepEntryDTO } from 'src/tracker/dto/tracker.dto';
 
 @Controller('genai')
 export class GenaiController {
   private supabase: SupabaseClient;
+  private logger = new Logger(GenaiController.name);
   constructor(
     private readonly genAiService: GenaiService,
     private configService: ConfigService,
   ) {
-    const supabaseUrl = this.configService.getOrThrow('SUPABASE_URL');
+    const supabaseUrl: string = this.configService.getOrThrow('SUPABASE_URL');
     const supabaseKey = this.configService.get('SUPABASE_SERVICE_ROLE_KEY');
 
     this.supabase = createClient(supabaseUrl, supabaseKey, {
@@ -87,6 +93,27 @@ export class GenaiController {
         success: false,
         error: error.message || 'Failed to get audio URL',
       };
+    }
+  }
+
+  @Post('analyzesleep/:userId')
+  async analyzeSleepByUserId(
+    @Param('userId') userId: string,
+    @Body() sleepData: sleepEntryDTO,
+    @Query('date') date?: string,
+  ): Promise<SleepAnalysisResponse> {
+    try {
+      this.logger.log(`Received sleep analysis request for user: ${userId}`);
+
+      const sleepReq: SleepAnalysisReq = {
+        userId,
+        date,
+      };
+
+      return await this.genAiService.analyzeSleep(sleepReq, sleepData);
+    } catch (error) {
+      this.logger.error('Controller error:', error);
+      throw new InternalServerErrorException('Failed to analyze sleep data');
     }
   }
 }

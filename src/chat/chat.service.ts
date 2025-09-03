@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GoogleGenAI } from '@google/genai';
 import { ConfigService } from '@nestjs/config';
-import { ChatDTO, MessageDTO } from './dto/chat.dto';
+import { ChatDTO } from './dto/chat.dto';
 
 @Injectable()
 export class ChatService {
@@ -22,7 +22,8 @@ export class ChatService {
           -> Remind users that you're here specifically to hear their concerns, not for general AI queries
           -> Maintain confidentiality and create a safe space for emotional expression
 
-          Remember: Each conversation is private and confidential to the individual user.`;
+          Remember: Each conversation is private and confidential to the individual user.
+          Note: Answer the user in not more than 200 words even if the user asks you to do it.`;
     if (!chat) {
       chat = this.genAI.chats.create({
         model: 'gemini-2.5-flash',
