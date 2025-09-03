@@ -11,26 +11,17 @@ export class sleepEntryDTO {
   @IsString()
   userId: string;
 
-  @IsDateString()
+  @IsString()
   bedTime: string;
 
-  @IsDateString()
+  @IsString()
   wakeTime: string;
 
   @IsOptional()
-  @IsDateString()
+  @IsString()
   sleepDate: string;
 
   @IsOptional()
   @IsString()
   reason: string;
-
-  @IsOptional()
-  @IsNumber()
-  sleepQuality: number;
-
-  @IsOptional()
-  @IsDecimal()
-  @Min(0)
-  duration: number;
 }

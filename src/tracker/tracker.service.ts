@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/auth/prisma.service';
 import { sleepEntryDTO } from './dto/tracker.dto';
-import { StyleReferenceImage } from '@google/genai';
 
 @Injectable()
 export class TrackerService {
@@ -24,7 +23,6 @@ export class TrackerService {
           userId: payload.userId,
           bedTime: new Date(payload.bedTime),
           wakeTime: new Date(payload.wakeTime),
-          duration: payload.duration,
           reason: payload.reason,
           sleepDate: payload.sleepDate,
         },
