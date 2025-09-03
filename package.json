@@ -34,6 +34,8 @@
     "@supabase/supabase-js": "^2.55.0",
     "audio-buffer": "^5.0.0",
     "audiobuffer-to-wav": "^1.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
     "dotenv": "^17.2.1",
     "firebase-admin": "^13.4.0",
     "passport-jwt": "^4.0.1",
