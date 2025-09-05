@@ -17,6 +17,7 @@ import {
 } from './dto/genai.dto';
 import { PrismaService } from 'src/auth/prisma.service';
 import { sleepEntryDTO } from 'src/tracker/dto/tracker.dto';
+import { McpService } from 'src/mcp/mcp.service';
 
 @Injectable()
 export class GenaiService {
@@ -25,6 +26,7 @@ export class GenaiService {
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
+    private readonly mcp: McpService,
   ) {
     const apiKey: string = this.configService.getOrThrow('GEMINI_API_KEY');
     this.genAI = new GoogleGenAI({ apiKey: apiKey });
@@ -193,6 +195,40 @@ export class GenaiService {
     - Any reasons or notes provided
     - Sleep hygiene recommendations
 
+    Key Points: Each analysis should not be more than 50 words.
     Provide actionable insights and personalized recommendations based on the actual data provided.`;
+  }
+
+  async analyzeAndEmailSleep(
+    userId: string,
+    sleepData: sleepEntryDTO,
+    to: string,
+  ) {
+    const analysis = await this.analyzeSleep(
+      { userId, date: sleepData.sleepDate },
+      sleepData,
+    );
+
+    const subject = `Your Sleep Report for ${sleepData.sleepDate}`;
+    const body = `
+ Hi there,
+
+ Here’s your sleep analysis:
+
+ Score: ${analysis.sleepScore}/100
+ Summary: ${analysis.analysis}
+
+ Recommendations:
+ - ${analysis.recommendations.join('\n- ')}
+
+ Insights:
+ • Duration: ${analysis.insight.durationAnalysis}
+ • Timing: ${analysis.insight.timingAnalysis}
+ • Overall: ${analysis.insight.totalAnalysis}
+
+ Stay well!
+ `;
+
+    return this.mcp.sendGmail(userId, to, subject, body);
   }
 }

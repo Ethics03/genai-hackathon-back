@@ -11,6 +11,8 @@ import {
   HttpException,
   HttpStatus,
   InternalServerErrorException,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { GenaiService } from './genai.service';
 import { Response } from 'express';
@@ -52,10 +54,8 @@ export class GenaiController {
   ) {
     const dur = parseInt(duration, 10) || 10; // default 10 sec
 
-    // call service (should return a Buffer of WAV data)
     const wavBuffer = this.genAiService.generateBinaural(mood, dur);
 
-    // set headers for download/stream
     res.setHeader('Content-Type', 'audio/wav');
     res.setHeader('Content-Disposition', 'attachment; filename="binaural.wav"');
     res.send(wavBuffer); // wav is a Buffer or Uint8Array
@@ -114,6 +114,45 @@ export class GenaiController {
     } catch (error) {
       this.logger.error('Controller error:', error);
       throw new InternalServerErrorException('Failed to analyze sleep data');
+    }
+  }
+  @Post('analyze-and-email/:userId/to/:email')
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  async analyzeAndEmailSleepWithParams(
+    @Param('userId') userId: string,
+    @Param('email') email: string,
+    @Body() sleepData: sleepEntryDTO,
+  ) {
+    try {
+      this.logger.log(
+        `Analyzing and emailing sleep data for user: ${userId} to: ${email}`,
+      );
+
+      // Basic email validation
+      if (!email.includes('@')) {
+        throw new HttpException('Invalid email format', HttpStatus.BAD_REQUEST);
+      }
+
+      const result = await this.genAiService.analyzeAndEmailSleep(
+        userId,
+        sleepData,
+        email,
+      );
+
+      return {
+        success: true,
+        message: `Sleep analysis completed and email sent to ${email}`,
+        result,
+      };
+    } catch (error) {
+      this.logger.error('Error analyzing and emailing sleep data:', error);
+      throw new HttpException(
+        {
+          message: 'Failed to analyze and email sleep data',
+          error: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
