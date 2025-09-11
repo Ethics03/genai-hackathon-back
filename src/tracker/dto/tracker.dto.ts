@@ -1,11 +1,5 @@
-import {
-  IsDateString,
-  IsDecimal,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Min,
-} from '@nestjs/class-validator';
+import { IsOptional, IsString } from '@nestjs/class-validator';
+import { Mood } from 'generated/prisma';
 
 export class sleepEntryDTO {
   @IsString()
@@ -24,4 +18,18 @@ export class sleepEntryDTO {
   @IsOptional()
   @IsString()
   reason: string;
+}
+
+export class moodEntryDTO {
+  @IsString()
+  userId: string;
+
+  @IsString()
+  mood: Mood;
+
+  @IsString()
+  note: string;
+
+  @IsString()
+  date: string;
 }

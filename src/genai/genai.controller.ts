@@ -17,6 +17,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ConfigService } from '@nestjs/config';
 import { SleepAnalysisReq, SleepAnalysisResponse } from './dto/genai.dto';
 import { sleepEntryDTO } from 'src/tracker/dto/tracker.dto';
+import { SleepReportService } from './sleep-report.service';
 
 @Controller('genai')
 export class GenaiController {
@@ -25,9 +26,12 @@ export class GenaiController {
   constructor(
     private readonly genAiService: GenaiService,
     private configService: ConfigService,
+    private readonly sleepreportservice: SleepReportService,
   ) {
     const supabaseUrl: string = this.configService.getOrThrow('SUPABASE_URL');
-    const supabaseKey = this.configService.get('SUPABASE_SERVICE_ROLE_KEY!');
+    const supabaseKey = this.configService.getOrThrow(
+      'SUPABASE_SERVICE_ROLE_KEY',
+    );
 
     this.supabase = createClient(supabaseUrl, supabaseKey, {
       auth: {
@@ -111,5 +115,10 @@ export class GenaiController {
       this.logger.error('Controller error:', error);
       throw new InternalServerErrorException('Failed to analyze sleep data');
     }
+  }
+
+  @Post('send-report')
+  async send(@Body() body: { userId: string; date?: string }) {
+    return await this.sleepreportservice.sendReport(body.userId, body.date);
   }
 }

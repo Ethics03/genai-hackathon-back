@@ -17,7 +17,6 @@ import {
 } from './dto/genai.dto';
 import { PrismaService } from 'src/auth/prisma.service';
 import { sleepEntryDTO } from 'src/tracker/dto/tracker.dto';
-import { McpService } from 'src/mcp/mcp.service';
 
 @Injectable()
 export class GenaiService {
@@ -26,7 +25,6 @@ export class GenaiService {
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
-    private readonly mcp: McpService,
   ) {
     const apiKey: string = this.configService.getOrThrow('GEMINI_API_KEY');
     this.genAI = new GoogleGenAI({ apiKey: apiKey });

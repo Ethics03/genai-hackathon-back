@@ -23,6 +23,8 @@ model Users {
   house     House[]
   sleep     SleepEntry[]
   activity  UserActivity[]
+  mood      MoodEntry[]
+  gmailTokens GmailToken[]
   createdAt DateTime     @default(now())
   updatedAt DateTime     @default(now()) @updatedAt
 
@@ -73,8 +75,69 @@ model UserActivity {
 }
 
 
+model GmailToken {
+  id            String   @id @default(cuid())
+  userId        String
+
+  // Encrypted token storage for security
+  accessTokenEncrypted String   @db.Text
+  accessTokenIv        String   @db.VarChar(32)
+  accessTokenTag       String   @db.VarChar(32)
+
+  refreshTokenEncrypted String?  @db.Text
+  refreshTokenIv        String?  @db.VarChar(32)
+  refreshTokenTag       String?  @db.VarChar(32)
+
+  // Token metadata
+  tokenType     String   @default("Bearer")
+  scope         String?  @db.Text
+  expiresAt     DateTime?
+
+  // Security and tracking
+  tokenHash     String   @db.VarChar(64) // SHA-256 hash for verification
+  lastUsedAt    DateTime?
+  isActive      Boolean  @default(true)
+
+  // Relations
+  user          Users    @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+
+  @@unique([userId]) // One Gmail token per user
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([isActive])
+  @@index([lastUsedAt])
+}
+
+model MoodEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  mood      Mood
+  note      String?
+
+  user      Users    @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([userId, date])
+  @@index([date])
+}
+
 enum Houses {
   luminara
   noctis
   solaris
+}
+
+enum Mood {
+  sad
+  happy
+  smile
+  vsad
+  neutral
 }
