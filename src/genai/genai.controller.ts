@@ -8,11 +8,7 @@ import {
   Param,
   BadRequestException,
   Logger,
-  HttpException,
-  HttpStatus,
   InternalServerErrorException,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { GenaiService } from './genai.service';
 import { Response } from 'express';
@@ -31,7 +27,7 @@ export class GenaiController {
     private configService: ConfigService,
   ) {
     const supabaseUrl: string = this.configService.getOrThrow('SUPABASE_URL');
-    const supabaseKey = this.configService.get('SUPABASE_SERVICE_ROLE_KEY');
+    const supabaseKey = this.configService.get('SUPABASE_SERVICE_ROLE_KEY!');
 
     this.supabase = createClient(supabaseUrl, supabaseKey, {
       auth: {
@@ -114,45 +110,6 @@ export class GenaiController {
     } catch (error) {
       this.logger.error('Controller error:', error);
       throw new InternalServerErrorException('Failed to analyze sleep data');
-    }
-  }
-  @Post('analyze-and-email/:userId/to/:email')
-  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  async analyzeAndEmailSleepWithParams(
-    @Param('userId') userId: string,
-    @Param('email') email: string,
-    @Body() sleepData: sleepEntryDTO,
-  ) {
-    try {
-      this.logger.log(
-        `Analyzing and emailing sleep data for user: ${userId} to: ${email}`,
-      );
-
-      // Basic email validation
-      if (!email.includes('@')) {
-        throw new HttpException('Invalid email format', HttpStatus.BAD_REQUEST);
-      }
-
-      const result = await this.genAiService.analyzeAndEmailSleep(
-        userId,
-        sleepData,
-        email,
-      );
-
-      return {
-        success: true,
-        message: `Sleep analysis completed and email sent to ${email}`,
-        result,
-      };
-    } catch (error) {
-      this.logger.error('Error analyzing and emailing sleep data:', error);
-      throw new HttpException(
-        {
-          message: 'Failed to analyze and email sleep data',
-          error: error.message,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
     }
   }
 }
