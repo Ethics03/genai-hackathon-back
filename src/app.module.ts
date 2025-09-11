@@ -8,10 +8,7 @@ import { ChatModule } from './chat/chat.module';
 import { TrackerModule } from './tracker/tracker.module';
 import { PrismaService } from './auth/prisma.service';
 import { AuthModule } from './auth/auth.module';
-import { McpModule } from './mcp/mcp.module';
 import * as dotenv from 'dotenv';
-import { McpService } from './mcp/mcp.service';
-import { EmailService } from './email/email.service';
 import { EmailModule } from './email/email.module';
 dotenv.config();
 @Module({
@@ -22,15 +19,8 @@ dotenv.config();
     ChatModule,
     TrackerModule,
     EmailModule,
-    McpModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    GenaiService,
-    PrismaService,
-    McpService,
-    EmailService,
-  ],
+  providers: [AppService, GenaiService, PrismaService],
 })
 export class AppModule {}

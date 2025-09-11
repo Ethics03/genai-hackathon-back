@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { GoogleGenAI } from '@google/genai';
 import { ConfigService } from '@nestjs/config';
 import { ChatDTO } from './dto/chat.dto';
-
+import { spawn } from 'child_process';
 @Injectable()
 export class ChatService {
   private genAI: GoogleGenAI;
@@ -77,5 +77,39 @@ export class ChatService {
       totalSessions: this.sessions.size,
       userId: userId,
     };
+  }
+
+  async callMcpTool(method: string, params: any) {
+    return new Promise((resolve, reject) => {
+      const mcp = spawn('node', ['path/to/mcp.js']); // or path to your MCP executable
+
+      const request = {
+        jsonrpc: '2.0',
+        method: method,
+        params: params,
+        id: 1,
+      };
+
+      mcp.stdin.write(JSON.stringify(request) + '\n');
+
+      let dataBuffer = '';
+      mcp.stdout.on('data', (data) => {
+        dataBuffer += data.toString();
+        try {
+          const parsed = JSON.parse(dataBuffer);
+          if (parsed.id === 1) {
+            resolve(parsed.result);
+            mcp.kill();
+          }
+        } catch (e) {
+          // wait for complete JSON
+        }
+      });
+
+      mcp.stderr.on('data', (err) => {
+        reject(err.toString());
+        mcp.kill();
+      });
+    });
   }
 }
