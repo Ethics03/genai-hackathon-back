@@ -27,7 +27,7 @@ export class GenaiController {
     private configService: ConfigService,
   ) {
     const supabaseUrl: string = this.configService.getOrThrow('SUPABASE_URL');
-    const supabaseKey = this.configService.get('SUPABASE_SERVICE_ROLE_KEY!');
+    const supabaseKey = this.configService.getOrThrow('SUPABASE_SERVICE_ROLE_KEY');
 
     this.supabase = createClient(supabaseUrl, supabaseKey, {
       auth: {
