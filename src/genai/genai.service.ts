@@ -199,36 +199,24 @@ export class GenaiService {
     Provide actionable insights and personalized recommendations based on the actual data provided.`;
   }
 
-  async analyzeAndEmailSleep(
-    userId: string,
-    sleepData: sleepEntryDTO,
-    to: string,
-  ) {
-    const analysis = await this.analyzeSleep(
-      { userId, date: sleepData.sleepDate },
-      sleepData,
-    );
+  generateSleepEmail(analysis: SleepAnalysisResponse) {
+    return `
+  Hi there,
 
-    const subject = `Your Sleep Report for ${sleepData.sleepDate}`;
-    const body = `
- Hi there,
+  Here’s your sleep analysis:
 
- Here’s your sleep analysis:
+  Score: ${analysis.sleepScore}/100
+  Summary: ${analysis.analysis}
 
- Score: ${analysis.sleepScore}/100
- Summary: ${analysis.analysis}
+  Recommendations:
+  - ${analysis.recommendations.join('\n- ')}
 
- Recommendations:
- - ${analysis.recommendations.join('\n- ')}
+  Insights:
+  • Duration: ${analysis.insight.durationAnalysis}
+  • Timing: ${analysis.insight.timingAnalysis}
+  • Overall: ${analysis.insight.totalAnalysis}
 
- Insights:
- • Duration: ${analysis.insight.durationAnalysis}
- • Timing: ${analysis.insight.timingAnalysis}
- • Overall: ${analysis.insight.totalAnalysis}
-
- Stay well!
- `;
-
-    return this.mcp.sendGmail(userId, to, subject, body);
+  Stay well!
+  `;
   }
 }
