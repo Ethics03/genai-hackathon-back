@@ -9,7 +9,8 @@ import { ConfigService } from '@nestjs/config';
 import * as fs from 'node:fs';
 
 import AudioBuffer from 'audio-buffer';
-import * as audioBufferToWav from 'audiobuffer-to-wav';
+import audioBufferToWav from 'audiobuffer-to-wav';
+
 import {
   MOOD_CONFIGS,
   SleepAnalysisReq,
