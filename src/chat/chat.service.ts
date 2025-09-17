@@ -9,8 +9,8 @@ import { ChatDTO } from './dto/chat.dto';
 
 @Injectable()
 export class ChatService {
-  private genAI: GoogleGenerativeAI;
-  private sessions: Map<string, ChatSession> = new Map();
+  private genAI: GoogleGenerativeAI; //genai sdk
+  private sessions: Map<string, ChatSession> = new Map(); //for now sessions are stored in a map for prototype.
   private readonly logger = new Logger(ChatService.name);
   constructor(private readonly configService: ConfigService) {
     const apiKey: string = this.configService.getOrThrow('GEMINI_API_KEY');
@@ -50,15 +50,15 @@ export class ChatService {
             },
           ],
         },
-      ];
+      ]; //create a new history if no chat session exists
 
       const model = this.genAI.getGenerativeModel({
         model: 'gemini-2.5-flash', // Use a current model name
         systemInstruction,
       });
 
-      chatSession = model.startChat({ history });
-      this.sessions.set(userId, chatSession);
+      chatSession = model.startChat({ history }); // start chat
+      this.sessions.set(userId, chatSession); //set the chat session for the given user
       this.logger.log(`Created new chat for user: ${userId}`);
     }
 
